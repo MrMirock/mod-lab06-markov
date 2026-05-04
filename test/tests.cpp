@@ -1,12 +1,12 @@
 // Copyright 2026 Kashin Georgii
 
-#include "textgen.h"
-
 #include <gtest/gtest.h>
 
 #include <stdexcept>
 #include <string>
 #include <sstream>
+
+#include "textgen.h"
 
 // 1
 TEST(MarkovTest, AllPrefixesHaveCorrectSize) {
