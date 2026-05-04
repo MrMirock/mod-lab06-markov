@@ -1,17 +1,22 @@
-// Copyright 2026
-#include <gtest/gtest.h>
-#include "../include/textgen.h"
-#include <stdexcept>
-#include <ctime>
+// Copyright 2026 Kashin Georgii
 
-// 1. Проверка размера префикса в таблице (все префиксы имеют заданную длину)
+#include "textgen.h"
+
+#include <gtest/gtest.h>
+
+#include <stdexcept>
+#include <string>
+#include <sstream>
+
+// 1
 TEST(MarkovTest, AllPrefixesHaveCorrectSize) {
     MarkovTextGenerator gen("a b c a b d", 2);
-    for (const auto& entry : gen.getTable())
+    for (const auto& entry : gen.getTable()) {
         EXPECT_EQ(entry.first.size(), 2u);
+    }
 }
 
-// 2. Одна пара префикс-суффикс (два слова)
+// 2
 TEST(MarkovTest, SinglePrefixSuffixPair) {
     MarkovTextGenerator gen("first second third", 2);
     auto& table = gen.getTable();
@@ -21,7 +26,7 @@ TEST(MarkovTest, SinglePrefixSuffixPair) {
     EXPECT_EQ(table.at(p)[0], "third");
 }
 
-// 3. Единственный суффикс у префикса (nPref=1)
+// 3
 TEST(MarkovTest, OneSuffixForPrefix) {
     MarkovTextGenerator gen("hello world", 1);
     auto& table = gen.getTable();
@@ -29,7 +34,7 @@ TEST(MarkovTest, OneSuffixForPrefix) {
     EXPECT_EQ(table.at(p)[0], "world");
 }
 
-// 4. Несколько суффиксов у одного префикса
+// 4
 TEST(MarkovTest, MultipleSuffixes) {
     MarkovTextGenerator gen("a b c a b d", 2);
     prefix p = { "a", "b" };
@@ -40,22 +45,21 @@ TEST(MarkovTest, MultipleSuffixes) {
     EXPECT_TRUE(suffixes[0] == "d" || suffixes[1] == "d");
 }
 
-// 5. Генерация линейной цепочки (без ветвления)
+// 5
 TEST(MarkovTest, LinearGeneration) {
     MarkovTextGenerator gen("a b c d e", 2);
     std::string result = gen.generate(5);
-    // должно быть ровно "a b c d e " (с пробелом в конце)
     EXPECT_EQ(result, "a b c d e ");
 }
 
-// 6. Генерация с единственным суффиксом даёт предсказуемую строку
+// 6
 TEST(MarkovTest, SinglePathDeterministic) {
     MarkovTextGenerator gen("x y z", 2);
     std::string res = gen.generate(3);
     EXPECT_EQ(res, "x y z ");
 }
 
-// 7. Генерация с ветвлением: оба варианта должны появляться при многократном запуске
+// 7
 TEST(MarkovTest, BranchingBothOptionsAppear) {
     MarkovTextGenerator gen("a b x a b y", 2);
     bool foundX = false, foundY = false;
@@ -67,7 +71,7 @@ TEST(MarkovTest, BranchingBothOptionsAppear) {
     EXPECT_TRUE(foundX && foundY);
 }
 
-// 8. Генерация не выходит за максимальное число слов
+// 8
 TEST(MarkovTest, GenerationRespectsMaxWords) {
     MarkovTextGenerator gen("one two three four five six", 2);
     std::string res = gen.generate(4);
@@ -78,17 +82,17 @@ TEST(MarkovTest, GenerationRespectsMaxWords) {
     EXPECT_LE(count, 4);
 }
 
-// 9. Обработка пустого текста – выбрасывается исключение
+// 9
 TEST(MarkovTest, EmptyTextThrows) {
     EXPECT_THROW(MarkovTextGenerator("", 2), std::invalid_argument);
 }
 
-// 10. Текст короче префикса – исключение
+// 10
 TEST(MarkovTest, TooShortTextThrows) {
     EXPECT_THROW(MarkovTextGenerator("a b", 3), std::invalid_argument);
 }
 
-// 11. Префикс из трёх слов строится корректно
+// 11
 TEST(MarkovTest, ThreeWordPrefix) {
     MarkovTextGenerator gen("a b c d e f", 3);
     const auto& table = gen.getTable();
@@ -97,39 +101,38 @@ TEST(MarkovTest, ThreeWordPrefix) {
     EXPECT_EQ(table.at(p)[0], "d");
 }
 
-// 12. Генерация при nPref=1 работает
+// 12
 TEST(MarkovTest, OneWordPrefix) {
     MarkovTextGenerator gen("cat dog cat bird", 1);
     std::string res = gen.generate(3);
-    // первые два слова должны быть cat dog или cat bird
     bool valid = (res == "cat dog " || res == "cat bird ");
     EXPECT_TRUE(valid);
 }
 
-// 13. Таблица не содержит префиксов с неправильным числом слов
+// 13
 TEST(MarkovTest, TablePrefixSizeUniform) {
     MarkovTextGenerator gen("a b c d e f g", 2);
-    for (auto& entry : gen.getTable())
+    for (const auto& entry : gen.getTable()) {
         EXPECT_EQ(entry.first.size(), 2u);
+    }
 }
 
-// 14. Генерация останавливается, если префикс не найден (тупик)
+// 14
 TEST(MarkovTest, StopOnMissingPrefix) {
     MarkovTextGenerator gen("a b c", 2);
     std::string res = gen.generate(10);
-    // слов должно быть ровно 3 (a b c)
     std::istringstream iss(res);
     int count = 0;
     std::string word;
-    while (iss >> word) ++count;
+    while (iss >> word) {
+        ++count;
+    }
     EXPECT_EQ(count, 3);
 }
 
-// 15. Начальный префикс сохраняется при обучении
+// 15
 TEST(MarkovTest, FirstPrefixCorrectlySaved) {
     MarkovTextGenerator gen("first second third", 2);
     prefix expected = { "first", "second" };
     EXPECT_EQ(gen.getFirstPrefix(), expected);
 }
-
-// main для Google Test уже внутри библиотеки
