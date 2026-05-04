@@ -2,12 +2,13 @@
 
 #include "textgen.h"
 
-#include <sstream>
-#include <stdexcept>
-#include <vector>
-#include <string>
 #include <cstdlib>
 #include <ctime>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 MarkovTextGenerator::MarkovTextGenerator(
     const std::string& text, int nPref) {
